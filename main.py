@@ -5,15 +5,11 @@ import os
 
 app = Flask(__name__)
 
-# ✅ BEST PRACTICE: load API key from environment
+# Load API key from environment
 API_KEY = os.getenv("GEMINI_API_KEY")
 
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY is not set")
-
-client = genai.Client(api_key=API_KEY)
-
-
 
 client = genai.Client(api_key=API_KEY)
 
@@ -25,9 +21,7 @@ def index():
 def chat():
     try:
         data = request.get_json()
-        print("REQUEST DATA:", data)  # debug
 
-        # ✅ SAFETY CHECK
         if not data or "message" not in data:
             return jsonify({"reply": "No message received"}), 400
 
@@ -38,16 +32,12 @@ def chat():
             contents=user_message
         )
 
-        # ✅ Ensure text exists
-        reply = response.text if response.text else "I couldn't generate a response."
-
+        reply = response.text or "I couldn't generate a response."
         return jsonify({"reply": reply})
 
     except Exception as e:
-        print("---- SERVER ERROR ----")
-        print(e)
-        print("----------------------")
+        print("SERVER ERROR:", e)
         return jsonify({"reply": "Backend error occurred"}), 500
 
 if __name__ == "__main__":
-    app.run(port=8080, debug=True)
+    app.run(port=8080)
